@@ -1,6 +1,6 @@
 <template>
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
         <div class="logo-wrapper">
           <div class="logo" :class="{'highlight':totalCount>0}">
@@ -35,10 +35,34 @@
         </li>
       </transition-group>
     </div>
+    <transition name="fold">
+      <div class="shopcart-list" v-show="listShow">
+      
+      <!-- <div class="shopcart-list"> -->
+        <div class="list-header">
+          <h1 class="title">购物车</h1>
+          <span class="empty">清空</span>
+        </div>      
+        <div class="list-content">
+          <ul>
+            <li v-for="(food,index) in selectFoods" :key="index">
+              <span class="name">{{ food.name }}</span>
+              <div class="price">
+                <span>￥{{ food.price*food.count }}</span>
+              </div>
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
+            </li>
+          </ul>
+        </div>      
+      </div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import cartcontrol from "components/cartcontrol/cartcontrol"
 export default {
   name: 'shopcart',
   data () {
@@ -61,7 +85,8 @@ export default {
           show:false
         }
       ],
-      dropBalls:[]
+      dropBalls:[],
+      fold:true
     }
   },
   props:{
@@ -86,6 +111,7 @@ export default {
     },
   },
   computed:{
+    
     totalPrice(){
       let total = 0;
       // console.log(this.selectFoods)
@@ -112,9 +138,23 @@ export default {
       }else{
         return 'enough';
       }
+    },
+    listShow(){
+      if(this.totalCount){
+        this.fold=true;
+        return false;
+      }
+      let show = !this.fold;
+      return show;
     }
   },
   methods:{
+    toggleList(){
+      if(!this.totalCount){
+        return;
+      }
+      this.fold=!this.fold;
+    },
     drop(el){
        //触发一次事件就会将所有小球进行遍历
         for (let i = 0; i < this.balls.length; i++) {
@@ -128,7 +168,6 @@ export default {
         }
     },
     beforeEnter(el){
-      console.log(1)
       let count = this.balls.length;
       while (count--) {
         let ball = this.balls[count];
@@ -147,7 +186,6 @@ export default {
       }
     },
     enter(el, done){
-      console.log(2)
       /* eslint-disable no-unused-vars */
       let rf = el.offsetHeight; //触发重绘html
       this.$nextTick(() => { //让动画效果异步执行,提高性能
@@ -164,7 +202,6 @@ export default {
       // },300)
     },
     afterEnter(el){
-      console.log(3)
       let ball = this.dropBalls.shift(); //完成一次动画就删除一个dropBalls的小球
       if (ball) {
         ball.show = false;
@@ -172,10 +209,11 @@ export default {
       }
     },
     enterCancelled(el){
-      console.log(4)
-      console.log(el)
-      
+
     }
+  },
+  components:{
+    cartcontrol
   }
 }
 </script>
@@ -285,14 +323,47 @@ export default {
         bottom 22px
         z-index 99
         &.drop-enter-active
-          transition all .4s cubic-bezier(0.49,-0.29,0.75,0.41)
+          transition all .4s cubic-bezier(0.29,-0.29,0.75,0.41)
         .inner
           width 16px
           height 16px
           border-radius 50%
           background rgb(0,160,220)
-          transition all .4s cubic-bezier(0.49,-0.29,0.75,0.41)
-            
+          transition all .4s 
+    .shopcart-list
+      position absolute
+      bottom 0
+      left 0
+      z-index -1
+      width 100%
+      &.fold-enter
+        transform translate3d(0,-100%,0)
+      &.fold-enter-to
+        transform translate3d(0,0,0)
+      &.fold-enter-active
+        transition all .5s
+      .list-header
+        line-height 40px
+        padding 0 18px
+        background #f3f5f7
+        overflow hidden
+        border-bottom 1px solid rgba(7,17,27,.1)
+        .title
+          float left
+          font-size 14px
+          color  rgba(7,17,27,.7)
+        .empty
+          float right
+          font-size 12px
+      .list-content
+        padding 18px
+        max-height 127px
+        background #fff
+        overflow hidden
+          
+        
+
+
         // &.drop-enter
         
         // &.drop-active

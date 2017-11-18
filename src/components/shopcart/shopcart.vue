@@ -43,9 +43,9 @@
           <h1 class="title">购物车</h1>
           <span class="empty">清空</span>
         </div>      
-        <div class="list-content">
+        <div class="list-content" ref="list-content">
           <ul>
-            <li v-for="(food,index) in selectFoods" :key="index">
+            <li v-for="(food,index) in selectFoods" :key="index" class="food">
               <span class="name">{{ food.name }}</span>
               <div class="price">
                 <span>￥{{ food.price*food.count }}</span>
@@ -62,6 +62,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import BScroll from 'better-scroll'
 import cartcontrol from "components/cartcontrol/cartcontrol"
 export default {
   name: 'shopcart',
@@ -140,11 +141,21 @@ export default {
       }
     },
     listShow(){
-      if(this.totalCount){
-        this.fold=true;
+      let _this = this;
+      if(!_this.totalCount){
+        _this.fold=true;
         return false;
       }
-      let show = !this.fold;
+      let show = !_this.fold;
+      if(show){
+        _this.$nextTick(()=>{
+          if(!_this.scroll){
+            _this.scroll = new BScroll(_this.$refs['list-content'])
+          }else{
+            _this.scroll.refresh();
+          }
+        })
+      }
       return show;
     }
   },
@@ -214,7 +225,8 @@ export default {
   },
   components:{
     cartcontrol
-  }
+  },
+  
 }
 </script>
 
@@ -242,7 +254,7 @@ export default {
           display inline-block
           position relative
           top -10px
-          margin:0 12px
+          margin 0 12px
           padding 6px
           width 44px
           height 44px 
@@ -332,15 +344,19 @@ export default {
           transition all .4s 
     .shopcart-list
       position absolute
-      bottom 0
+      bottom 46px
       left 0
       z-index -1
       width 100%
       &.fold-enter
-        transform translate3d(0,-100%,0)
+        transform translate3d(0,100%,0)
       &.fold-enter-to
         transform translate3d(0,0,0)
-      &.fold-enter-active
+      &.fold-leave
+        transform translate3d(0,0,0)
+      &.fold-leave-to
+        transform translate3d(0,100%,0)
+      &.fold-enter-active, &.fold-leave-active
         transition all .5s
       .list-header
         line-height 40px
@@ -355,13 +371,33 @@ export default {
         .empty
           float right
           font-size 12px
+          color #00a0dc
       .list-content
-        padding 18px
+        padding 6px 10px
         max-height 127px
         background #fff
         overflow hidden
-          
-        
+        .food
+          position relative
+          padding 12px 0
+          box-sizing border-box
+          border-bottom 1px solid rgba(7,17,27,.1)
+          .name
+            line-height 24px
+            font-size 14px
+            color rgb(7,17,27)
+          .price
+            position absolute
+            right 90px
+            bottom 10px
+            line-height 24px
+            font-size 14px
+            color rgb(240,20,20)
+            font-weight 700        
+          .cartcontrol-wrapper
+            position absolute
+            right 0
+            bottom 6px
 
 
         // &.drop-enter

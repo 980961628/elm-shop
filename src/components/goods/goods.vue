@@ -18,7 +18,7 @@
          <li v-for="(item,index) in goods" :key="index" class="food-list food-list-hook">
            <h1 class="title">{{ item.name }}</h1>
            <ul>
-             <li v-for="(food,index2) in item.foods" :key="index2" class="food-item">
+             <li v-for="(food,index2) in item.foods" :key="index2" class="food-item" @click="selectFood(food,$event)">
                <div class="icon">
                  <img :src="food.icon" alt="" width="57" height="57">
                </div>
@@ -43,6 +43,7 @@
       </ul>
     </div>
     <shopcart ref="shopCart" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice" :select-foods="selectFoods"></shopcart>
+    <food :food="selectedFood" ref="food"></food>
   </div>
 
 </template>
@@ -51,6 +52,7 @@
   import axios from 'axios'
   import BScroll from 'better-scroll'
   import shopcart from 'components/shopcart/shopcart'
+  import food from 'components/food/food'
   import cartcontrol from 'components/cartcontrol/cartcontrol'
 
   export default {
@@ -60,7 +62,8 @@
         msg: '商品组件',
         goods:[],
         listHeight:[],
-        scrollY:0
+        scrollY:0,
+        selectedFood:{}
       }
     },
     mounted(){
@@ -116,7 +119,12 @@
       },
       drop(target){
         // console.log(el)
+        console.log(1)
         this.$refs.shopCart.drop(target)
+      },
+      selectFood(food,event){
+        this.selectedFood=food;
+        this.$refs.food.show();
       }
     },
     computed:{
@@ -150,7 +158,8 @@
     },
     components:{
       shopcart,
-      cartcontrol
+      cartcontrol,
+      food
     }
   }
 </script>
